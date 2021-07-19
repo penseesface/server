@@ -236,7 +236,7 @@ def core_cmake_args(components, backends, install_dir):
     cargs.append('-DTRITON_ENABLE_METRICS:BOOL={}'.format(
         cmake_enable(FLAGS.enable_metrics)))
     cargs.append('-DTRITON_ENABLE_METRICS_GPU:BOOL={}'.format(
-        cmake_enable(FLAGS.enable_gpu_metrics)))
+        cmake_enable(FLAGS.enable_gpu and FLAGS.enable_gpu_metrics)))
     cargs.append('-DTRITON_ENABLE_TRACING:BOOL={}'.format(
         cmake_enable(FLAGS.enable_tracing)))
     cargs.append('-DTRITON_ENABLE_NVTX:BOOL={}'.format(
@@ -380,9 +380,10 @@ def pytorch_cmake_args(images):
 
 
 def onnxruntime_cmake_args(images, library_paths):
+    enableTRT = "OFF" if FLAGS.enable_gpu else "ON"
     cargs = [
-        '-DTRITON_ENABLE_ONNXRUNTIME_TENSORRT=ON',
-        '-DTRITON_BUILD_ONNXRUNTIME_VERSION={}'.format(
+        '-DTRITON_ENABLE_ONNXRUNTIME_TENSORRT={}',
+        '-DTRITON_BUILD_ONNXRUNTIME_VERSION={}'.format(enableTRT,
             TRITON_VERSION_MAP[FLAGS.version][2])
     ]
 
@@ -472,6 +473,11 @@ def dali_cmake_args():
         '-DTRITON_DALI_SKIP_DOWNLOAD=OFF',
     ]
 
+def install_basic_libraries():
+    # libraries that ubuntu 20.04 cpu only version needs
+    return '''
+RUN apt-get update && apt-get install -y --no-install-recommends libnuma-dev
+'''
 
 def install_dcgm_libraries():
     return '''
@@ -580,10 +586,13 @@ RUN rm -fr *
 COPY . .
 ENTRYPOINT []
 '''
-        df += install_dcgm_libraries()
-        df += '''
+        if FLAGS.enable_gpu:
+            df += install_dcgm_libraries()
+            df += '''
 RUN patch -ruN -d /usr/include/ < /workspace/build/libdcgm/dcgm_api_export.patch
 '''
+        else:
+            df += install_basic_libraries()
 
     df += '''
 ENV TRITON_SERVER_VERSION ${TRITON_VERSION}
@@ -680,7 +689,8 @@ RUN apt-get update && \
          libre2-5 && \
     rm -rf /var/lib/apt/lists/*
 '''
-    df += install_dcgm_libraries()
+    if FLAGS.enable_gpu:
+        df += install_dcgm_libraries()
     # Add dependencies needed for python backend
     if 'python' in backends:
         df += '''
@@ -720,22 +730,23 @@ COPY --chown=1000:1000 --from=tritonserver_build /tmp/tritonbuild/install/backen
         df += '''
 COPY --chown=1000:1000 --from=tritonserver_build /tmp/tritonbuild/install/repoagents repoagents
 '''
-
-    df += '''
+    if FLAGS.enable_gpu:
+        df += '''
 # Extra defensive wiring for CUDA Compat lib
 RUN ln -sf ${{_CUDA_COMPAT_PATH}}/lib.real ${{_CUDA_COMPAT_PATH}}/lib \
  && echo ${{_CUDA_COMPAT_PATH}}/lib > /etc/ld.so.conf.d/00-cuda-compat.conf \
  && ldconfig \
  && rm -f ${{_CUDA_COMPAT_PATH}}/lib
-
+'''.format(argmap['NVIDIA_BUILD_ID'], argmap['NVIDIA_BUILD_ID'],
+           argmap['NVIDIA_BUILD_REF'])
+    df += '''
 COPY --chown=1000:1000 nvidia_entrypoint.sh /opt/tritonserver
 ENTRYPOINT ["/opt/tritonserver/nvidia_entrypoint.sh"]
 
 ENV NVIDIA_BUILD_ID {}
 LABEL com.nvidia.build.id={}
 LABEL com.nvidia.build.ref={}
-'''.format(argmap['NVIDIA_BUILD_ID'], argmap['NVIDIA_BUILD_ID'],
-           argmap['NVIDIA_BUILD_REF'])
+'''
 
     # Add feature labels for SageMaker endpoint
     if 'sagemaker' in endpoints:
