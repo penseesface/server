@@ -184,7 +184,13 @@ def create_argmap(images):
 
     vars = p_version.stdout
     dcgm_ver = re.search("DCGM_VERSION=([\S]{4,}) ", vars)
-    dcgm_version = "" if dcgm_ver == None else dcgm_ver.group(1)
+    dcgm_version = ""
+    if dcgm_ver == None:
+        dcgm_version = "2.2.3"
+        log("WARNING: DCGM version not found from image, installing the earlierst version {}"
+            .format(dcgm_version))
+    else:
+        dcgm_version = dcgm_ver.group(1)
     fail_if(
         len(dcgm_version) == 0,
         'docker inspect to find DCGM version failed, {}'.format(vars))
@@ -328,12 +334,15 @@ if __name__ == '__main__':
             "min":
                 "nvcr.io/nvidia/tritonserver:{}-py3-min".format(
                     FLAGS.container_version)
-        }   
-    fail_if(len(images) != 2, "Need to both specify 'full' and 'min' images if at all")
+        }
+    fail_if(
+        len(images) != 2,
+        "Need to both specify 'full' and 'min' images if at all")
 
     argmap = create_argmap(images)
 
-    start_gpu_dockerfile(FLAGS.work_dir, images, argmap, dockerfile_name, FLAGS.backend)
+    start_gpu_dockerfile(FLAGS.work_dir, images, argmap, dockerfile_name,
+                         FLAGS.backend)
     add_requested_backends(FLAGS.work_dir, dockerfile_name, FLAGS.backend)
     add_requested_repoagents(FLAGS.work_dir, dockerfile_name, FLAGS.repoagent)
     end_gpu_dockerfile(FLAGS.work_dir, dockerfile_name, argmap)
