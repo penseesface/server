@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2018-2021, NVIDIA CORPORATION. All rights reserved.
+# Copyright 2018-2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -43,6 +43,7 @@ CLIENT_LOG="./client.log"
 BATCHER_TEST=batcher_test.py
 VERIFY_TIMESTAMPS=verify_timestamps.py
 TEST_RESULT_FILE='test_results.txt'
+TIME_LOG='time_log.txt'
 
 if [ -z "$TEST_VALGRIND" ]; then
     TEST_VALGRIND="0"
@@ -580,5 +581,7 @@ else
     cat $CLIENT_LOG
     echo -e "\n***\n*** Test FAILED\n***"
 fi
+
+cat $TIME_LOG
 
 exit $RET

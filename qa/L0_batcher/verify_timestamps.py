@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2019-2020, NVIDIA CORPORATION. All rights reserved.
+# Copyright 2019-2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -68,12 +68,18 @@ def verify_timestamps(traces, preserve):
     # First find the latest send end timestamp for the batch with large delay
     large_delay_send_end = 0
     small_delay_traces = []
+    f = open("time_log.txt", "a")
+    f.write("compute_span:\n")
+    f.close()
     for trace_id, trace in filtered_traces.items():
         timestamps = dict()
         for ts in trace["timestamps"]:
             timestamps[ts["name"]] = ts["ns"]
         # Hardcoded delay value here (knowing large delay is 400ms)
         compute_span = timestamps["COMPUTE_END"] - timestamps["COMPUTE_START"]
+        f = open("time_log.txt", "a")
+        f.write(str(trace['id']) + ": " + str(compute_span) + "\n")
+        f.close()
         # If the 3rd batch is also processed by large delay instance, we don't
         # want to use its responses as baseline
         if trace["id"] <= (
@@ -91,6 +97,9 @@ def verify_timestamps(traces, preserve):
         send_end = timestamps["HTTP_SEND_END"]
         if send_end > large_delay_send_end:
             response_request_after_large_delay_count += 1
+            f = open("time_log.txt", "a")
+            f.write("==" + str(trace['id']) + "==\n")
+            f.close()
 
     # Hardcoded expected count here
     print(response_request_after_large_delay_count)
