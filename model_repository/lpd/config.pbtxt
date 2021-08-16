@@ -1,0 +1,35 @@
+ platform: "tensorrt_plan"
+  max_batch_size: 8
+  dynamic_batching {
+    preferred_batch_size: [ 1, 4, 8 ]
+    max_queue_delay_microseconds: 100
+}
+  input [
+    {
+      name: "images"
+      data_type: TYPE_FP32
+      dims: [3, 640, 640]
+    }
+  ]
+  output [
+    {
+      name: "397"
+      data_type: TYPE_FP32
+      dims: [ 3,80,80, 7 ]
+    },
+        {
+      name: "458"
+      data_type: TYPE_FP32
+      dims: [ 3,40,40, 7 ]
+    },    
+    {
+      name: "519"
+      data_type: TYPE_FP32
+      dims: [3,20,20, 7 ]
+    },
+    {
+      name: "output"
+      data_type: TYPE_FP32
+      dims: [ 25200, 7 ]
+    }
+  ]

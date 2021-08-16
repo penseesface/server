@@ -1,3 +1,5 @@
 /builddir
 /.vscode
 *.so
+*.onnx
+*.plan
