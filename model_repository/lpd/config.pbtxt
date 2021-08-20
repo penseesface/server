@@ -1,7 +1,7 @@
  platform: "tensorrt_plan"
-  max_batch_size: 8
+  max_batch_size: 1
   dynamic_batching {
-    preferred_batch_size: [ 1, 4, 8 ]
+    preferred_batch_size: [ 1 ]
     max_queue_delay_microseconds: 100
 }
   input [

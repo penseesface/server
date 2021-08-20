@@ -1,0 +1,7 @@
+# Build docker
+docker build . -t lpr_server:v2
+
+
+
+# run server 
+sh runServer.sh

@@ -24,44 +24,22 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-name: "kps"
-platform: "tensorrt_plan"
-max_batch_size: 1
+name: "lpd_post"
+backend: "python"
+
 input [
   {
-    name: "input"
+    name: "LPD_input1_post"
     data_type: TYPE_FP32
-    format: FORMAT_NCHW
-    dims: [ 3, 64, 64 ]
-    reshape { shape: [  3, 64, 64 ] }
+    dims: [ 25200, 7 ]
   }
 ]
 output [
   {
-    name: "output1"
+    name: "LPD_output1_post"
     data_type: TYPE_FP32
-    dims: [  1]
-  },
-  {
-    name: "output2"
-    data_type: TYPE_INT32
-    dims: [  1 ]
-  },
-  {
-    name: "output3"
-    data_type: TYPE_FP32
-    dims: [  8,64 ]
+    dims: [ 1,6 ]
   }
 ]
 
-instance_group [
-  {
-    count: 1
-    kind: KIND_GPU
-    gpus: [ 0 ]
-  }
-]
-
-
-version_policy: { all { } }
-
+instance_group [{ kind: KIND_CPU }]

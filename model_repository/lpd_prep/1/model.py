@@ -1,28 +1,3 @@
-# Copyright (c) 2020, NVIDIA CORPORATION. All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-#  * Neither the name of NVIDIA CORPORATION nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import numpy as np
 import sys
@@ -73,24 +48,24 @@ class TritonPythonModel:
 
     def execute(self, requests):
 
-        def letterbox(img, new_shape=(640, 640), color=(114, 114, 114)):
-            # Resize and pad image while meeting stride-multiple constraints
-            h,w = img.shape[:2]  # current shape [height, width]
+        # def letterbox(img, new_shape=(640, 640), color=(114, 114, 114)):
+        #     # Resize and pad image while meeting stride-multiple constraints
+        #     h,w = img.shape[:2]  # current shape [height, width]
 
-            l = h if h > w else w
+        #     l = h if h > w else w
 
-            scale = new_shape[0]/l
+        #     scale = new_shape[0]/l
 
-            h,w = np.array(img.shape[:2])*scale
+        #     h,w = np.array(img.shape[:2])*scale
             
-            resized = cv2.resize(img,(int(w),int(h)))
+        #     resized = cv2.resize(img,(int(w),int(h)))
             
-            dh = max(new_shape[0]-resized.shape[0],0)
-            dw = max(new_shape[1]-resized.shape[1],0)
+        #     dh = max(new_shape[0]-resized.shape[0],0)
+        #     dw = max(new_shape[1]-resized.shape[1],0)
 
-            img = cv2.copyMakeBorder(resized, 0, dh, 0, dw, cv2.BORDER_CONSTANT, value=color)  # add border
+        #     img = cv2.copyMakeBorder(resized, 0, dh, 0, dw, cv2.BORDER_CONSTANT, value=color)  # add border
 
-            return img #, scale
+        #     return img #, scale
 
 
 
@@ -101,9 +76,9 @@ class TritonPythonModel:
             unq_image = np.squeeze(input_.as_numpy())
             rgb_image = cv2.cvtColor(unq_image, cv2.COLOR_BGR2RGB)
 
-            img = LPR_util.letterbox(rgb_image)
+            #img = letterbox(rgb_image)
 
-            img=img.transpose(2, 0, 1).astype(float)  # BGR to RGB,
+            img=rgb_image.transpose(2, 0, 1).astype(float)  # BGR to RGB,
             
             imgs = np.float32(img)/255
 

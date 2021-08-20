@@ -24,21 +24,28 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-name: "LPD_prep"
+name: "kps_prep"
 backend: "python"
 
 input [
   {
-    name: "LPD_input1_prep"
-    data_type: TYPE_UINT8
-    dims: [ 640, 640 , 3 ]
+    name: "KPS_input1_prep"
+    data_type: TYPE_FP32
+    dims: [3,640, 640]
+  },
+
+  {
+    name: "KPS_input2_prep"
+    data_type: TYPE_FP32
+    dims: [1,6]
   }
+
 ]
 output [
   {
-    name: "LPD_output1_prep"
+    name: "KPS_output1_prep"
     data_type: TYPE_FP32
-    dims: [ 3, 640, 640 ]
+    dims: [3,64,64]
   }
 ]
 
